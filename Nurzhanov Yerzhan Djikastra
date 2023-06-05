@@ -1,0 +1,60 @@
+import heapq
+
+class CarNavigation:
+    def __init__(self, map_graph):
+        self.map_graph = map_graph
+        self.current_position = None
+        self.destination = None
+    
+    def set_initial_position(self, position):
+        self.current_position = position
+    
+    def set_destination(self, destination):
+        self.destination = destination
+    
+    def get_current_position(self):
+        return self.current_position
+    
+    def navigate(self):
+        if self.current_position is None or self.destination is None:
+            raise ValueError("Initial position and destination must be set before navigation.")
+        
+        distances = {node: float('inf') for node in self.map_graph}
+        distances[self.current_position] = 0
+        queue = [(0, self.current_position)]
+        
+        while queue:
+            current_distance, current_node = heapq.heappop(queue)
+            
+            if current_distance > distances[current_node]:
+                continue
+            
+            if current_node == self.destination:
+                break
+            
+            for neighbor, distance in self.map_graph[current_node].items():
+                if distances[current_node] + distance < distances[neighbor]:
+                    distances[neighbor] = distances[current_node] + distance
+                    heapq.heappush(queue, (distances[neighbor], neighbor))
+        
+        if distances[self.destination] == float('inf'):
+            raise ValueError("No valid path found to the destination.")
+        
+        return distances[self.destination]
+
+map_graph = {
+    'A': {'B': 5, 'C': 3},
+    'B': {'A': 5, 'D': 2},
+    'C': {'A': 3, 'D': 1},
+    'D': {'B': 2, 'C': 1, 'E': 4},
+    'E': {'D': 4}
+}
+
+navigator = CarNavigation(map_graph)
+
+navigator.set_initial_position('A')
+navigator.set_destination('E')
+
+#total distance
+total_distance = navigator.navigate()
+print("Total distance:", total_distance)
